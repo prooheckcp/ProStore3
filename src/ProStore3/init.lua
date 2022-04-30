@@ -154,7 +154,7 @@ local function playerLeft(player : Player)
     storePaths[player] = nil
     saveData(player.UserId)
     local userKey : string = generateUserKey(player.UserId)
-    EventSystem.fireEvent(EVENT_LIST.PlayerLeft, playerSocket[userKey])
+    EventSystem.fireEvent(EVENT_LIST.PlayerLeft, player, playerSocket[userKey])
     playerSocket[userKey] = nil
 end
 
@@ -244,7 +244,7 @@ local function _set(player : Player, argument : string, newValue : any)
 
     if newValue ~= value then
         parentTable[valueIndex] = newValue
-        EventSystem.fireEvent(EVENT_LIST.DataUpdated, playerSocket[generateUserKey(player.UserId)])        
+        EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[generateUserKey(player.UserId)])        
     end
 end
 
@@ -263,7 +263,7 @@ local function _increment(player : Player, argument : string, amount : number)
     end
 
     parentTable[valueIndex] = value + amount
-    EventSystem.fireEvent(EVENT_LIST.DataUpdated, playerSocket[generateUserKey(player.UserId)])
+    EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[generateUserKey(player.UserId)])
 end
 
 local function _wipeData(player : Player)
@@ -273,7 +273,7 @@ local function _wipeData(player : Player)
 
     local userKey : string = generateUserKey(player.UserId)
     playerSocket[userKey] = DeepCopy(Schema)
-    EventSystem.fireEvent(EVENT_LIST.DataUpdated, playerSocket[userKey])
+    EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[userKey])
     saveData(player.UserId)
 end
 
