@@ -1,0 +1,11 @@
+{
+  "name": "ProStore3",
+  "tree": {
+    "$className": "DataModel",
+
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$path": "src"
+    }
+  }
+}
