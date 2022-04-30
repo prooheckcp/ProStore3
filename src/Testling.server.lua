@@ -17,6 +17,7 @@ end
 
     Data:
     Level = 1,
+    Inventory = {},
     Profile = {
         SomeInt = 2,
         Currency = 100,
@@ -29,7 +30,6 @@ end
         }
     }
 ]]
-
 local function testDataManipulators(player : Player)
     local level : number = ProStore3.Get(player, "Level")
     local currency : number = ProStore3.Get(player, "Profile.Currency")
@@ -46,6 +46,13 @@ local function testDataManipulators(player : Player)
 
     ProStore3.WipeData(player)
     print(ProStore3.GetTable(player))
+
+    --Test the add element
+    print(ProStore3.Get(player, "Inventory"))
+    ProStore3.AddElement(player, "Inventory", {id = "sword", damage = 2})
+    print(ProStore3.Get(player, "Inventory"))
+    ProStore3.AddElement(player, "Inventory", {id = "knife", damage = 3})
+    print(ProStore3.Get(player, "Inventory"))
 end
 
 local function testEvents()

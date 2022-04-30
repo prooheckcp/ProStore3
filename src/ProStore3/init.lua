@@ -5,7 +5,7 @@
         Discord: Prooheckcp#1906
         Twitter: @prooheckcp
 
-    Prooheckcp is a full-time Portuguese game developer that works main with Roblox Studio and Unity.
+    Prooheckcp is a full-time Portuguese game developer that works mainly with Roblox Studio and Unity.
 ]]
 
 --Services
@@ -289,6 +289,40 @@ local function _getTable(player : Player)
 end
 
 --[[
+    Adds element to an array
+]]
+local function _addElement(player : Player, argument : string, element : any)
+    if not userExists(player) then
+        return
+    end
+
+    local value : any, success : boolean, parentTable : table = recursiveFindWrapper(player, argument)
+    
+    if not success then
+        return warn("The given path is not valid: "..argument)
+    end
+
+    local isTable : boolean = typeof(value) == "table"
+
+    if isTable then
+        local counter : number = 0
+        for _, _ in pairs(value) do
+            counter += 1
+        end
+
+        if counter > #value then
+            isTable = false
+        end
+    end
+
+    if not isTable then
+        return warn("The chosen path is not an array")
+    end
+
+    table.insert(value, element)
+end
+
+--[[
     Forces a player data to be saved
 ]]
 local function _forcedSave(player : Player)
@@ -310,6 +344,7 @@ local exposedMethods : table = {
     Get = _get,
     Set = _set,
     Increment = _increment,
+    AddElement = _addElement,
     GetTable = _getTable,
     ForcedSave = _forcedSave,
     WipeData = _wipeData
