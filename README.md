@@ -69,7 +69,8 @@ Returns a request parameter of the user. It's read-only.
 | value | ``any``| The requested data from the path |
 **Example:**
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
 
 local level : number = ProStore3.Get(player, "Level")
 local currency : number = ProStore3.Get(player, "Profile.Currency")
@@ -93,7 +94,8 @@ Overwrites the value at the given path by the new value.
 | oldValue | ``any``| Returns the old value that existed before the overwrite |
 **Example:**
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
 
 ProStore3.Set(player, "Level", 3)
 print("Level after set: ", ProStore3.Get(player, "Level"))
@@ -115,7 +117,8 @@ Increments a value by the given amount. It only works on number type variables.
 || ``void``||
 **Example:**
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
 
 print(ProStore3.Get("Level")) -- Output: 1
 ProStore3.Increment(player, "Level", 2)
@@ -138,7 +141,8 @@ Adds an object into an array. Will fail if you attempt to use it an a non-array 
 || ``void``||
 **Example:**
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
 
 print(ProStore3.Get(player, "Inventory"))
 ProStore3.AddElement(player, "Inventory", {id = "sword", damage = 2})
@@ -161,7 +165,9 @@ Returns the whole table of the users data by reference.
 | usersData | ``table``| The whole data of the user |
 **Example:**
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
+
 
 local fullData : table = ProStore3.GetTable(player)
 print(fullData)
@@ -180,7 +186,9 @@ Forces a users data to get saved. By default the data gets saved when a user lea
 || ``void``||
 **Example:**
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
+
 
 ProStore3.ForcedSave(player)
 ```
@@ -200,7 +208,9 @@ This function completely resets all of the users data returning it back to the o
 
 **Example:**
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
+
 
 ProStore3.WipeData(player)
 print(ProStore3.GetTable(player)) -- will print the same as  in the schema.lua
@@ -216,7 +226,9 @@ Gets called whenever a user joins the experience (will only get called once his 
 |   playerData       |      ``table``| All of users current data|
 | firstTime|``boolean`` |Whether it is teh first time of this user in this experience |
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
+
 ProStore3.PlayerJoined:Connect(function(player : Player, playerData : table, firstTime : boolean)
     print(player.Name, " joined the game.")
     print("Player data: ", playerData)
@@ -231,7 +243,9 @@ Gets called whenever a user leaves the experience.
 | player | ``player``| The player instance of whoever just left the game|
 |   playerData       |      ``table``| All of users current data|
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
+
 ProStore3.PlayerLeft:Connect(function(player : Player, playerData : table)
     print(player.Name, " left the game.")
     print("Player data: ", playerData)
@@ -247,11 +261,31 @@ Gets called whenever a users data gets updated.
 |   playerData       |      ``table``| All of users current data|
 
 ```lua
-local ProStore3 = game:GetService("ServerScriptService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
+
 ProStore3.DataUpdated:Connect(function(player : Player, playerData : table)
     print(player.Name, "'s data has been updated.")
     print("Player data: ", playerData)
 end)
+```
+
+## API (Extras) 🌟
+
+#### PlayerObject
+The player object is an object you can create in order to avoid the step of feeding the player instance into the function. All the functions showed above should be inherited into the playerObject allowing you to use that at any point.
+
+```lua
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
+
+local playerObject = ProStore3.GetPlayer(player)
+local level : number = playerObject:Get("Level")
+print("Level, ", level)
+playerObject:Set("Level", 3)
+print(playerObject:Get("Level"))
+playerObject:Increment("Level", 2)
+print(playerObject:Get("Level"))
 ```
 
 ## Installation
