@@ -15,7 +15,8 @@ This library is composed by 5 different files.
 
 ![](https://cdn.discordapp.com/attachments/670023265455964198/970425407084056607/unknown.png)
 
-From these files there are two that you should be looking at: the schema and the settings. These 2 files are what will decide the database format that you want and the settings that will go along with it.
+From these files there are two that you should be looking at: the schema
+a and the settings. These 2 files are what will decide the database format that you want and the settings that will go along with it.
 
 ProStore is supposed to offer you a simple and fast way of setting up your dataStore. All you have to do is drag it into whatever root directory you want in Roblox (E.g ServerScriptService), edit the schema to your need, change the settings, and require it from whatever file you want.
 
@@ -225,11 +226,11 @@ print(ProStore3.GetTable(player)) -- will print the same as  in the schema.lua
 ### ProStore3.PlayerJoined
 Gets called whenever a user joins the experience (will only get called once his data gets retrieved from the DataStore).
 **Parameters**
-| Name      |Type        |Description                                                  |
-|-----------|------------|-------------------------------------------------------------|
-|player     |``player``  | The player instance of whoever just joined the game         |
-|playerData |``table``   | All of users current data                                   |
-|firstTime  |``boolean`` |Whether it is teh first time of this user in this experience |
+| Name      |Type        |Description                                                   |
+|-----------|------------|--------------------------------------------------------------|
+|player     |``player``  | The player instance of whoever just joined the game          |
+|playerData |``table``   | All of users current data                                    |
+|firstTime  |``boolean`` | Whether it is the first time of this user in this experience |
 
 **Example**
 ```lua
