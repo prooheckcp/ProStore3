@@ -27,12 +27,12 @@ The schema is essentially the format that you will want your data to look like f
 #### Settings
 The settings file is just a file that allows you to change some of the behaviors from ProStore.
 
-| Setting           |Description                      |
-|----------------|---------------------------------|
-|AutoSave.Enabled|      Whether you want the users data to be saved every X amount of minute during his session.       |
-|AutoSave.TimeGap          |How often do you want the users data to be saved (In minutes).            |
-|AutoSave.Notifications          |If you want a notification to be be printed into the console whenever a users data gets saved.|
-| DatabasePrivateKey | The key that will be used to create your dataStore and access it.
+|Setting                |Description                                                                                   |
+|-----------------------|----------------------------------------------------------------------------------------------|
+|AutoSave.Enabled       |Whether you want the users data to be saved every X amount of minute during his session.      |
+|AutoSave.TimeGap       |How often do you want the users data to be saved (In minutes).                                |
+|AutoSave.Notifications |If you want a notification to be be printed into the console whenever a users data gets saved.|
+|DatabasePrivateKey     |The key that will be used to create your dataStore and access it.                             |
 
 ## API (Functions) 🧊
 For all of the examples on the API we will be assuming that the schema of our DataBase looks something like this.
@@ -58,15 +58,16 @@ return {
 Returns a request parameter of the user. It's read-only.
 
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| playerInstance | ``player``| The player whose data we want to access |
-|   path       |      ``string``| The path to the user data
+| Name  |Type      | Description                             |
+|-------|----------|-----------------------------------------|
+|player |``player``| The player whose data we want to access |
+|path   |``string``| The path to the user data               |
 
 **Returns**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| value | ``any``| The requested data from the path |
+|Name  |Type    |Description  |
+|------|--------|----------------------------------|
+|value |``any`` | The requested data from the path |
+
 **Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -82,16 +83,17 @@ print("Level: ", level, " Currency: ", currency)
 Overwrites the value at the given path by the new value.
 
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The player whose data we want to access |
-|   path       |      ``string``| The path to the user data |
-| newValue | ``any`` | The value that will overwrite the old value |
+| Name    |Type      | Description                                 |
+|---------|----------|---------------------------------------------|
+|player   |``player``| The player whose data we want to access     |
+|path     |``string``| The path to the user data                   |
+|newValue |``any``   | The value that will overwrite the old value |
 
 **Returns**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| oldValue | ``any``| Returns the old value that existed before the overwrite |
+| Name    |Type   |Description                                             |
+|---------|-------|--------------------------------------------------------|
+|oldValue |``any``|Returns the old value that existed before the overwrite |
+
 **Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -105,16 +107,17 @@ print("Level after set: ", ProStore3.Get(player, "Level"))
 Increments a value by the given amount. It only works on number type variables.
 
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The player whose data we want to access |
-|   path       |      ``string``| The path to the user data |
-| amount | ``number``|The amount that we wish to increment into the value|
+| Name  |Type       |Description                                        |
+|-------|-----------|---------------------------------------------------|
+|player |``player`` | The player whose data we want to access           |
+|path   |``string`` | The path to the user data                         |
+|amount |``number`` |The amount that we wish to increment into the value|
 
 **Returns**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-|| ``void``||
+|Name |Type    |Description |
+|-----|--------|------------|
+|     |``void``|            |
+
 **Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -129,16 +132,17 @@ print(ProStore3.Get(player, "Level")) -- Output: 3
 Adds an object into an array. Will fail if you attempt to use it an a non-array value.
 
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The player whose data we want to access |
-| path   |``string``| The path to the user data |
-| element |``any`` | The element that we want to add into the players array|
+| Name   |Type       |Description                                            |
+|--------|-----------|-------------------------------------------------------|
+|player  |``player`` |The player whose data we want to access                |
+|path    |``string`` |The path to the user data                              |
+|element |``any``    |The element that we want to add into the players array |
 
 **Returns**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-|| ``void``||
+|Name |Type    |Description |
+|-----|--------|------------|
+|     |``void``|            |
+
 **Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -155,14 +159,15 @@ print(ProStore3.Get(player, "Inventory"))
 Returns the whole table of the users data by reference.
 
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The player whose data we want to access |
+| Name  |Type       |Description                              |
+|-------|-----------|-----------------------------------------|
+|player |``player`` | The player whose data we want to access |
 
 **Returns**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| usersData | ``table``| The whole data of the user |
+| Name     |Type      |Description                |
+|----------|----------|---------------------------|
+|usersData |``table`` |The whole data of the user |
+
 **Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -175,20 +180,21 @@ print(fullData)
 
 ### ProStore3.ForcedSave
 Forces a users data to get saved. By default the data gets saved when a user leaves but for extra security you can also force it after an important action (E.g purchase done with robux).
+
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The target player for the data save|
+| Name  |Type       |Description                         |
+|-------|-----------|------------------------------------|
+|player |``player`` |The target player for the data save |
 
 **Returns**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-|| ``void``||
+|Name |Type    |Description |
+|-----|--------|------------|
+|     |``void``|            |
+
 **Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
 local ProStore3 = require(ServerScriptService.ProStore3)
-
 
 ProStore3.ForcedSave(player)
 ```
@@ -197,20 +203,19 @@ ProStore3.ForcedSave(player)
 This function completely resets all of the users data returning it back to the original schema (as if he was a user user).
 
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The target player for the data wipe|
+| Name  |Type       |Description                         |
+|-------|-----------|------------------------------------|
+|player |``player`` | The target player for the data wipe|
 
 **Returns**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-|| ``void``||
+|Name |Type    |Description |
+|-----|--------|------------|
+|     |``void``|            |
 
 **Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
 local ProStore3 = require(ServerScriptService.ProStore3)
-
 
 ProStore3.WipeData(player)
 print(ProStore3.GetTable(player)) -- will print the same as  in the schema.lua
@@ -220,11 +225,13 @@ print(ProStore3.GetTable(player)) -- will print the same as  in the schema.lua
 ### ProStore3.PlayerJoined
 Gets called whenever a user joins the experience (will only get called once his data gets retrieved from the DataStore).
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The player instance of whoever just joined the game|
-|   playerData       |      ``table``| All of users current data|
-| firstTime|``boolean`` |Whether it is teh first time of this user in this experience |
+| Name      |Type        |Description                                                  |
+|-----------|------------|-------------------------------------------------------------|
+|player     |``player``  | The player instance of whoever just joined the game         |
+|playerData |``table``   | All of users current data                                   |
+|firstTime  |``boolean`` |Whether it is teh first time of this user in this experience |
+
+**Example**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
 local ProStore3 = require(ServerScriptService.ProStore3)
@@ -238,10 +245,12 @@ end)
 ### ProStore3.PlayerLeft
 Gets called whenever a user leaves the experience.
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The player instance of whoever just left the game|
-|   playerData       |      ``table``| All of users current data|
+|Name       |Type      | Description                                       |
+|-----------|----------|---------------------------------------------------|
+|player     |``player``| The player instance of whoever just left the game |
+|playerData |``table`` | All of users current data                         |
+
+**Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
 local ProStore3 = require(ServerScriptService.ProStore3)
@@ -255,11 +264,12 @@ end)
 ### ProStore3.DataUpdated
 Gets called whenever a users data gets updated.
 **Parameters**
-| Name           |Type                      | Description |
-|----------------|---------------------------------|--|
-| player | ``player``| The player instance of whoevers data just changed|
-|   playerData       |      ``table``| All of users current data|
+| Name      |Type      | Description                                        |
+|-----------|----------|----------------------------------------------------|
+|player     |``player``| The player instance of whoever's data just changed |
+|playerData |``table`` | All of users current data                          |
 
+**Example:**
 ```lua
 local ServerScriptService = game:GetService("ServerScriptService")
 local ProStore3 = require(ServerScriptService.ProStore3)
