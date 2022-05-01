@@ -2,7 +2,7 @@ return {
     AutoSave = {
         Enabled = true,
         TimeGap = 5, --In minutes
-        Notifications = true
+        Notifications = false
     },
     DatabasePrivateKey = "GDAGgdasgda#5%gda"
 }

@@ -8,8 +8,14 @@ local ServerScriptService = game:GetService("ServerScriptService")
 --Dependencies
 local ProStore3 = require(ServerScriptService.ProStore3)
 
-local function testChainedData()
-    
+local function testChainedData(player : Player)
+    local playerObject = ProStore3.GetPlayer(player)
+    local level : number = playerObject:Get("Level")
+    print("Level, ", level)
+    playerObject:Set("Level", 3)
+    print(playerObject:Get("Level"))
+    playerObject:Increment("Level", 2)
+    print(playerObject:Get("Level"))
 end
 
 --[[
@@ -53,6 +59,8 @@ local function testDataManipulators(player : Player)
     print(ProStore3.Get(player, "Inventory"))
     ProStore3.AddElement(player, "Inventory", {id = "knife", damage = 3})
     print(ProStore3.Get(player, "Inventory"))
+
+    ProStore3.ForcedSave(player)
 end
 
 local function testEvents()
@@ -62,7 +70,8 @@ local function testEvents()
         print("First Time: ", firstTime)
         print("")
 
-        testDataManipulators(player)
+        testChainedData(player)
+        --testDataManipulators(player)
     end)
 
     ProStore3.PlayerLeft:Connect(function(player : Player, playerData : table)

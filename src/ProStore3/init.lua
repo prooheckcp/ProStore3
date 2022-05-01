@@ -246,6 +246,8 @@ local function _set(player : Player, argument : string, newValue : any)
         parentTable[valueIndex] = newValue
         EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[generateUserKey(player.UserId)])        
     end
+
+    return value
 end
 
 --[[
@@ -349,6 +351,32 @@ local exposedMethods : table = {
     ForcedSave = _forcedSave,
     WipeData = _wipeData
 }
+
+--Player object for chained events
+local PlayerObject = {}
+PlayerObject.__index = PlayerObject
+PlayerObject.player = nil
+
+function PlayerObject.new(player : Player)
+    local playerObject = setmetatable({}, PlayerObject)
+    playerObject.player = player
+
+    for methodName : string, methodBody in pairs(exposedMethods) do
+        playerObject[methodName] = function(self, ...)
+            return methodBody(self.player, ...)
+        end
+    end
+
+    return playerObject
+end
+
+exposedMethods.GetPlayer = function(player : Player)
+    if not userExists(player) then
+        return
+    end
+
+    return PlayerObject.new(player)
+end
 
 for eventName : string, eventConstructor : table in pairs(EventSystem.eventConstructors) do
     exposedMethods[eventName] = eventConstructor
