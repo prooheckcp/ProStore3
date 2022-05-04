@@ -50,12 +50,21 @@ local function generateUserKey(userID : number)
     return USER_KEY_FORMAT..tostring(userID)
 end
 
+local function warnWrapper(... : {string})
+    if RunService:IsStudio() and not Settings.OutputWarnings.inStudio then
+        return
+    elseif RunService:IsServer() and not Settings.OutputWarnings.inReleased then
+        return
+    end
+    warn(...)
+end
+
 --Returns if the player exists in the socket or not
 local function userExists(player : Player) : boolean
     local userKey : string = generateUserKey(player.UserId)
     local userExists : boolean = not (playerSocket[userKey] == nil)
     if not userExists then
-        warn("The given user: ", player.Name, " does not exist in the socket")
+        warnWrapper("The given user: ", player.Name, " does not exist in the socket")
     end
     return userExists
 end
@@ -71,8 +80,8 @@ local function getUserData(userID : number) : (table , boolean)
         return DataStore:GetAsync(userKey)
     end)
 
-    if not success or typeof(userData) ~= "table" then
-        warn("Failed to load: "..tostring(userID).."'s data")
+    if (RunService:IsStudio() and not Settings.LoadInStudio) or not success or typeof(userData) ~= "table" then
+        warnWrapper("Failed to load: "..tostring(userID).."'s data")
         return DeepCopy(Schema), true
     else
         return userData, false
@@ -83,11 +92,15 @@ end
     Saves the given user data
 ]]
 local function saveData(userID : number)
+    if RunService:IsStudio() and not Settings.SaveInStudio then
+        return
+    end
+
     local userKey : string = generateUserKey(userID)
     local userData = playerSocket[userKey]
 
     if not userData then
-        return warn("The given user by the ID of: "..tostring(userID).." is not in the player socket!")
+        return warnWrapper("The given user by the ID of: "..tostring(userID).." is not in the player socket!")
     end
 
     local success : boolean, errorMessage : string = pcall(function()
@@ -95,7 +108,7 @@ local function saveData(userID : number)
     end)
 
     if not success then
-        warn(errorMessage)
+        warnWrapper(errorMessage)
     end
 end
 
@@ -126,7 +139,7 @@ local function periodicalSave(player : Player)
     local userKey : string = generateUserKey(player.UserId)
     if playerSocket[userKey] then
         if Settings.AutoSave.Notifications then
-            warn("Autosaving: ", player.Name, "'s data")
+            warnWrapper("Autosaving: ", player.Name, "'s data")
         end
         saveData(player.UserId)
         periodicalSave(player.UserId)
@@ -138,6 +151,7 @@ end
 ]]
 local function playerJoined(player : Player)
     storePaths[player] = {}
+
     local playerData : table, firstTime : boolean = getUserData(player.UserId)
     local userKey : string = generateUserKey(player.UserId)
     cleanData(playerData)
@@ -229,7 +243,7 @@ local function _get(player : Player, argument : string)
     local value : any, success : boolean = recursiveFindWrapper(player, argument)
 
     if not success then
-        return warn("The given path is not valid: "..argument)
+        return warnWrapper("The given path is not valid: "..argument)
     end
 
     return value
@@ -246,9 +260,9 @@ local function _set(player : Player, argument : string, newValue : any)
     local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argument)
 
     if not success then
-        return warn("The given path is not valid: "..argument)
+        return warnWrapper("The given path is not valid: "..argument)
     elseif value ~= nil and typeof(value) ~= typeof(newValue) then
-        return warn("Invalid type. Expected <"..typeof(value).."> got <"..typeof(newValue).."> instead")
+        return warnWrapper("Invalid type. Expected <"..typeof(value).."> got <"..typeof(newValue).."> instead")
     end
 
     if newValue ~= value then
@@ -279,11 +293,11 @@ local function _increment(player : Player, argument : string, amount : number)
     local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argument)
 
     if not success then
-        return warn("The given path is not valid: "..argument)
+        return warnWrapper("The given path is not valid: "..argument)
     end
 
     if typeof(value) ~= "number" then
-        return warn("Increment can only be used on numerical values!")
+        return warnWrapper("Increment can only be used on numerical values!")
     end
 
     parentTable[valueIndex] = value + amount
@@ -323,7 +337,7 @@ local function _addElement(player : Player, argument : string, element : any)
     local value : any, success : boolean, parentTable : table = recursiveFindWrapper(player, argument)
     
     if not success then
-        return warn("The given path is not valid: "..argument)
+        return warnWrapper("The given path is not valid: "..argument)
     end
 
     local isTable : boolean = typeof(value) == "table"
@@ -340,7 +354,7 @@ local function _addElement(player : Player, argument : string, element : any)
     end
 
     if not isTable then
-        return warn("The chosen path is not an array")
+        return warnWrapper("The chosen path is not an array")
     end
 
     table.insert(value, element)
