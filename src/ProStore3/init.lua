@@ -20,6 +20,9 @@ local Settings = require(script.Settings)
 local EventSystem = require(script.EventSystem)
 
 --Constant
+local META_PROPERTIES : Dictionary<string | string> = {
+    Dynamic = "__Dynamic"
+}
 local KEY_SEPERATOR : string = "." 
 local USER_KEY_FORMAT : string = "userData_"
 local EVENT_LIST : Dictionary<string | string> = {
@@ -175,7 +178,7 @@ local function recursiveFind(mainTable : table, arguments : {string}, index) : (
 
     local value : any = mainTable[arguments[index]]
     if not value then
-        if mainTable.__Dynamic then
+        if mainTable[META_PROPERTIES.Dynamic] then
             if index == #arguments then
                 return nil , true, mainTable
             end
