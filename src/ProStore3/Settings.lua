@@ -4,5 +4,5 @@ return {
         TimeGap = 5, --In minutes
         Notifications = false
     },
-    DatabasePrivateKey = "GDAGgdasgda#5%gda"
+    DatabasePrivateKey = "GDAGgdasgda#5%gdb"
 }

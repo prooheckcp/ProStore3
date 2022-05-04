@@ -129,7 +129,7 @@ local function periodicalSave(player : Player)
             warn("Autosaving: ", player.Name, "'s data")
         end
         saveData(player.UserId)
-        periodicalSave(player.userID)
+        periodicalSave(player.UserId)
     end
 end
 
@@ -180,7 +180,7 @@ local function recursiveFind(mainTable : table, arguments : {string}, index) : (
     if not value then
         if mainTable[META_PROPERTIES.Dynamic] then
             if index == #arguments then
-                return nil , true, mainTable
+                return nil , true, mainTable, arguments[index]
             end
         end
 
@@ -257,6 +257,19 @@ local function _set(player : Player, argument : string, newValue : any)
     end
 
     return value
+end
+
+--[[
+    Checks if the given path value exists, usually used for dynamic data
+]]
+local function _exists(player : Player, argument : string)
+    if not userExists(player) then
+        return
+    end
+
+    local response = {recursiveFindWrapper(player, argument)}
+
+    return (response[2] and response[3][response[4]] ~= nil)
 end
 
 --[[
@@ -352,6 +365,7 @@ if not RunService:IsStudio() then
 end
 
 local exposedMethods : table = {
+    Exists = _exists,
     Get = _get,
     Set = _set,
     Increment = _increment,

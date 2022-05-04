@@ -64,10 +64,9 @@ local function testDataManipulators(player : Player)
 end
 
 local function changeDynamicArrays(player : Player)
+    print("Exist: ", ProStore3.Exists(player, "DynamicArray.test"))
     ProStore3.Set(player, "DynamicArray.test", 2)
-    ProStore3.Set(player, "NonDynamicArray.test", 2)
-
-    print(ProStore3.GetTable(player))
+    print("Exist: ", ProStore3.Exists(player, "DynamicArray.test"))
 end
 
 local function testEvents()
