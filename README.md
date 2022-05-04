@@ -299,6 +299,30 @@ playerObject:Increment("Level", 2)
 print(playerObject:Get("Level"))
 ```
 
+#### Meta properties
+You can mutate the behavior of a certain table nested in your schema by adding what I call a "meta property". See the example bellow.
+
+Schema.lua
+[](https://cdn.discordapp.com/attachments/670023265455964198/971419620214988851/unknown.png)
+
+Testing code:
+```lua
+    ProStore3.Set(player, "DynamicArray.test", 2)
+    ProStore3.Set(player, "NonDynamicArray.test", 2)
+
+    print(ProStore3.GetTable(player))
+```
+
+Output:
+[](https://cdn.discordapp.com/attachments/670023265455964198/971419773365792788/unknown.png)
+
+As we can see from the example above, by default tables do not allow you to set values that do not exist but we can add a __Dynamic meta property to change that behavior.
+
+|MetaProperty |Default   |
+|-------------|----------|
+|__Dynamic    |``false`` |
+|playerData   |``table`` |
+
 ## Installation
 
 To download the library you can either fork it into your Rojo project or download it from here.
