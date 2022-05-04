@@ -53,7 +53,7 @@ end
 local function warnWrapper(... : {string})
     if RunService:IsStudio() and not Settings.OutputWarnings.inStudio then
         return
-    elseif RunService:IsServer() and not Settings.OutputWarnings.inReleased then
+    elseif not RunService:IsStudio() and RunService:IsServer() and not Settings.OutputWarnings.inReleased then
         return
     end
     warn(...)
