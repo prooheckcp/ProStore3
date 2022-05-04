@@ -303,7 +303,7 @@ print(playerObject:Get("Level"))
 You can mutate the behavior of a certain table nested in your schema by adding what I call a "meta property". See the example bellow.
 
 Schema.lua
-[](https://cdn.discordapp.com/attachments/670023265455964198/971419620214988851/unknown.png)
+![](https://cdn.discordapp.com/attachments/670023265455964198/971419620214988851/unknown.png)
 
 Testing code:
 ```lua
@@ -314,14 +314,13 @@ Testing code:
 ```
 
 Output:
-[](https://cdn.discordapp.com/attachments/670023265455964198/971419773365792788/unknown.png)
+![](https://cdn.discordapp.com/attachments/670023265455964198/971419773365792788/unknown.png)
 
 As we can see from the example above, by default tables do not allow you to set values that do not exist but we can add a __Dynamic meta property to change that behavior.
 
 |MetaProperty |Default   |
 |-------------|----------|
 |__Dynamic    |``false`` |
-|playerData   |``table`` |
 
 ## Installation
 
