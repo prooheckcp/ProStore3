@@ -331,7 +331,17 @@ print(playerObject:Get("Level"))
 You can mutate the behavior of a certain table nested in your schema by adding what I call a "meta property". See the example bellow.
 
 Schema.lua
-![](https://cdn.discordapp.com/attachments/670023265455964198/971419620214988851/unknown.png)
+```lua
+return {
+    DynamicArray = {
+        __Dynamic = true
+    },
+    NonDynamicArray = {
+        __Dynamic = false
+    },
+    --...
+}
+```
 
 Testing code:
 ```lua
