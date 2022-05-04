@@ -63,14 +63,21 @@ local function testDataManipulators(player : Player)
     ProStore3.ForcedSave(player)
 end
 
+local function changeDynamicArrays(player : Player)
+    ProStore3.Set(player, "DynamicArray.test", 2)
+    ProStore3.Set(player, "NonDynamicArray.test", 2)
+
+    print(ProStore3.GetTable(player))
+end
+
 local function testEvents()
     ProStore3.PlayerJoined:Connect(function(player : Player, playerData : table, firstTime : boolean)
         print(player.Name, " joined the game.")
         print("Player data: ", playerData)
         print("First Time: ", firstTime)
         print("")
-
-        testChainedData(player)
+        changeDynamicArrays(player)
+        --testChainedData(player)
         --testDataManipulators(player)
     end)
 

@@ -175,6 +175,12 @@ local function recursiveFind(mainTable : table, arguments : {string}, index) : (
 
     local value : any = mainTable[arguments[index]]
     if not value then
+        if mainTable.__Dynamic then
+            if index == #arguments then
+                return nil , true, mainTable
+            end
+        end
+
         return nil, false
     else
         if index >= #arguments then
@@ -238,7 +244,7 @@ local function _set(player : Player, argument : string, newValue : any)
 
     if not success then
         return warn("The given path is not valid: "..argument)
-    elseif typeof(value) ~= typeof(newValue) then
+    elseif value ~= nil and typeof(value) ~= typeof(newValue) then
         return warn("Invalid type. Expected <"..typeof(value).."> got <"..typeof(newValue).."> instead")
     end
 

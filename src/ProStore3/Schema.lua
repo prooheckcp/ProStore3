@@ -1,4 +1,10 @@
 return {
+    DynamicArray = {
+        __Dynamic = true
+    },
+    NonDynamicArray = {
+        __Dynamic = false
+    },
     Level = 1,
     Inventory = {},
     Profile = {
