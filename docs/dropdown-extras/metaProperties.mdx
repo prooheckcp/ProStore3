@@ -1,0 +1,53 @@
+---
+sidebar_position: 2
+---
+
+# Meta Properties
+
+You can mutate the behavior of a certain table nested in your schema by adding what I call a "meta property". See the example bellow.
+
+:::tip Tip
+
+The PlayerObject is specially useful when modifying multiple elements in the player's data.
+:::
+
+```luau
+// highlight-start
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ProStore3 = require(ReplicatedStorage.ProStore3)
+
+ProStore3.PlayerJoined:Connect(function(player : Player)
+  ProStore3.Set(player, "DynamicArray.test", 2)
+  ProStore3.Set(player, "NonDynamicArray.test", 2)
+
+  print(ProStore3.GetTable(player))	
+end)
+// highlight-end
+```
+
+```shell
+>>Output
+
+08:16:49.861  The given path is not valid: NonDynamicArray.test  -  Server - ProStore3:59
+08:16:49.861   ▼  {
+                  ["DynamicArray"] =  ▼  {
+                      ["__Dynamic"] = true,
+                      ["test"] = 2
+                  },
+                  ["NonDynamicArray"] =  ▼  {
+                      ["__Dynamic"] = false
+                  }
+                }  -  Server - testing:9
+```
+
+As we can see from the example above, by default tables do not allow you to set values that do not exist but we can add a __Dynamic meta property to change that behavior.
+
+|MetaProperty |Default   |
+|-------------|----------|
+|__Dynamic    |``false`` |
+
+:::danger Warning
+
+Be careful when adding meta properties to tables. The more flexibility you add to the schema (e.g __Dynamic=true) the higher is the chance to accidentally corrupt the data.
+
+:::

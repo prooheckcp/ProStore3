@@ -20,6 +20,6 @@ Prism.languages.luau = {
     'class-name': {
         greedy: true,
         lookbehind: true,
-        pattern: /(?<=: )[\w, .]*/gi
+        pattern: /(?<=: )[\w.]*/gi
     }
 };

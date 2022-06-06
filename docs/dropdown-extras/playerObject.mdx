@@ -1,0 +1,28 @@
+---
+sidebar_position: 1
+---
+
+# PlayerObject
+
+The PlayerObject is a class that gets returned when calling the GetPlayer function.
+
+All the functions showed above should be inherited into the playerObject allowing you to use that at any point.
+
+:::tip Tip
+
+The PlayerObject is specially useful when modifying multiple elements in the player's data.
+:::
+
+```luau
+local ServerScriptService = game:GetService("ServerScriptService")
+local ProStore3 = require(ServerScriptService.ProStore3)
+
+local playerObject : ProStore3.PlayerObject = ProStore3.GetPlayer(player)
+local level : number = playerObject:Get("Level")
+
+print("Level, ", level)
+playerObject:Set("Level", 3)
+print(playerObject:Get("Level"))
+playerObject:Increment("Level", 2)
+print(playerObject:Get("Level"))
+```
