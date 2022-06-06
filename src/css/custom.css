@@ -19,11 +19,6 @@
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  background-image: url("@site/static/img/bubbles.png");
-  background-color: rgba(0.5, 0.5, 0.5, 0.0005);
-  background-repeat: repeat;
-  background-clip: border-box;
-  background-size:cover;
   --ifm-color-primary: #61a7eebc;
   --ifm-color-primary-dark: #21af90;
   --ifm-color-primary-darker: #1fa588;
