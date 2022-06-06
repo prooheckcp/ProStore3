@@ -362,7 +362,7 @@ As we can see from the example above, by default tables do not allow you to set 
 
 ## Installation
 
-To download the library you can either fork it into your Rojo project or download it from here.
+To download the library you can either fork it into your Rojo project or download it from here:
 [ProStore3](https://www.roblox.com/library/9521046169/ProStore3)
 
 ## Contact
