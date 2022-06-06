@@ -39,8 +39,6 @@ const config = {
         {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl:
-            `https://github.com/${PROFILE_NAME}/${REPO_NAME}/tree/main/`, //Change REPO_NAME to repository name
         },
         blog: false,
         theme: {
@@ -118,6 +116,15 @@ const config = {
         theme: darkCodeTheme,
         darkTheme: darkCodeTheme,
         additionalLanguages: ['powershell', 'lua']
+      },
+
+      custom_edit_url: null,
+      editCurrentVersion: false,
+
+      docs: {
+        sidebar: {
+          hideable: true,
+        },
       },
     }),
 };
