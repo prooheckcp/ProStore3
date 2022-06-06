@@ -5,7 +5,7 @@
 const darkCodeTheme = require('prism-react-renderer/themes/vsDark');
 
 //Some constants
-const REPO_NAME = "DocumentationTemplate"
+const REPO_NAME = "ProStore3"
 const PROFILE_NAME = "proohekcp"
 
 /** @type {import('@docusaurus/types').Config} */
@@ -14,16 +14,16 @@ const config = {
     require.resolve('docusaurus-lunr-search')
   ],
 
-  title: 'My Library Name',
-  tagline: 'Library description',
+  title: 'ProStore3',
+  tagline: 'A small Roblox DataStore manager',
   url: 'https://prooheckcp.github.io', //Change to website link
-  baseUrl: '/DocumentationTemplate/',
+  baseUrl: '/ProStore3/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
 
   organizationName: 'proohekcp',
-  projectName: 'DocumentationTemplate', // Change to the repo name
+  projectName: 'ProStore3', // Change to the repo name
   trailingSlash: false,
 
   i18n: {
