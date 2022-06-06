@@ -96,6 +96,8 @@ local function saveData(userID : number)
         return
     end
 
+    print("Got herE?")
+
     local userKey : string = generateUserKey(userID)
     local userData = playerSocket[userKey]
 
@@ -106,6 +108,8 @@ local function saveData(userID : number)
     local success : boolean, errorMessage : string = pcall(function()
         DataStore:SetAsync(userKey, userData)
     end)
+
+    print(userData)
 
     if not success then
         warnWrapper(errorMessage)
@@ -179,10 +183,12 @@ end
     Handle when a server closes
 ]]
 local function serverClosed()
-    for userKey, userData in pairs(playerSocket) do
-        pcall(function()
-            DataStore:SetAsync(userKey, userData)
-        end)
+    if RunService:IsStudio() and not Settings.SaveInStudio then
+        return
+    end
+
+    for player : Player in pairs(storePaths) do
+        saveData(player.UserId)
     end
 end
 
@@ -374,9 +380,7 @@ loadEvents()
 Players.PlayerAdded:Connect(playerJoined)
 Players.PlayerRemoving:Connect(playerLeft)
 
-if not RunService:IsStudio() then
-    game:BindToClose(serverClosed)
-end
+game:BindToClose(serverClosed)
 
 local exposedMethods : table = {
     Exists = _exists,
@@ -418,5 +422,7 @@ end
 for eventName : string, eventConstructor : table in pairs(EventSystem.eventConstructors) do
     exposedMethods[eventName] = eventConstructor
 end
+
+export type ProStore3 = typeof(exposedMethods)
 
 return exposedMethods
