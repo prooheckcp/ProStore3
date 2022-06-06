@@ -43,6 +43,24 @@ local function loadEvents() : nil
     end
 end
 
+--Simple algorithm to browse thru all direcorties of a given function
+local function binarySearchTree(object : table, callback : (parentTableReference : table, index : string, value : any)->nil) : nil
+    local function browseNode(_object : table)
+        local tableValues : {table} = {}
+        for index : string, value : any in pairs(_object) do
+            if typeof(value) == "table" then
+                table.insert(tableValues, value)
+                continue
+            else
+                callback(_object, index, value)
+            end
+        end
+        for _, newTable : table in pairs(tableValues) do
+            browseNode(newTable)
+        end
+    end
+    browseNode(object)
+end
 
 --Helper methods
 --Generates the key that is used to store in the dataStore
@@ -96,8 +114,6 @@ local function saveData(userID : number)
         return
     end
 
-    print("Got herE?")
-
     local userKey : string = generateUserKey(userID)
     local userData = playerSocket[userKey]
 
@@ -105,11 +121,16 @@ local function saveData(userID : number)
         return warnWrapper("The given user by the ID of: "..tostring(userID).." is not in the player socket!")
     end
 
+    binarySearchTree(userData, function(parentTable : table, index : string)
+        local firstTwoLetters : string = string.sub(index, 1, 2)
+        if firstTwoLetters == "__" then
+            parentTable[index] = nil
+        end
+    end)
+
     local success : boolean, errorMessage : string = pcall(function()
         DataStore:SetAsync(userKey, userData)
     end)
-
-    print(userData)
 
     if not success then
         warnWrapper(errorMessage)
