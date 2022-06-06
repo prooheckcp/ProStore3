@@ -1,6 +1,6 @@
 return {
-    SaveInStudio = false,
-    LoadInStudio = false,
+    SaveInStudio = true,
+    LoadInStudio = true,
     OutputWarnings = {
         inStudio = true,
         inReleased = false

@@ -17,7 +17,7 @@ local RunService = game:GetService("RunService")
 local DeepCopy = require(script.DeepCopy)
 local Schema = require(script.Schema)
 local Settings = require(script.Settings)
-local EventSystem = require(script.EventSystem)
+local Event = require(script.classes.Event)
 
 --Constant
 local META_PROPERTIES : Dictionary<string | string> = {
@@ -34,15 +34,34 @@ local EVENT_LIST : Dictionary<string | string> = {
 --Variables
 local DataStore = DataStoreService:GetDataStore(Settings)
 
+local eventsList : Dictionary<string | Event.Event> = {}
 local playerSocket : Dictionary<string | table> = {}
 local storePaths : Dictionary<Player | Dictionary<string | table>> = {} --Stores tables memory addresses in relation to their paths
 
 local function loadEvents() : nil
     for _, eventIndex : string in pairs(EVENT_LIST) do
-        EventSystem.newEvent(eventIndex)
+        eventsList[eventIndex] = Event.new()
     end
 end
 
+--Simple algorithm to browse thru all direcorties of a given function
+local function binarySearchTree(object : table, callback : (parentTableReference : table, index : string, value : any)->nil) : nil
+    local function browseNode(_object : table)
+        local tableValues : {table} = {}
+        for index : string, value : any in pairs(_object) do
+            if typeof(value) == "table" then
+                table.insert(tableValues, value)
+                continue
+            else
+                callback(_object, index, value)
+            end
+        end
+        for _, newTable : table in pairs(tableValues) do
+            browseNode(newTable)
+        end
+    end
+    browseNode(object)
+end
 
 --Helper methods
 --Generates the key that is used to store in the dataStore
@@ -61,6 +80,10 @@ end
 
 --Returns if the player exists in the socket or not
 local function userExists(player : Player) : boolean
+    if not player then
+       return false, warnWrapper("The given player nil!")
+    end
+
     local userKey : string = generateUserKey(player.UserId)
     local userExists : boolean = not (playerSocket[userKey] == nil)
     if not userExists then
@@ -102,6 +125,13 @@ local function saveData(userID : number)
     if not userData then
         return warnWrapper("The given user by the ID of: "..tostring(userID).." is not in the player socket!")
     end
+
+    binarySearchTree(userData, function(parentTable : table, index : string)
+        local firstTwoLetters : string = string.sub(index, 1, 2)
+        if firstTwoLetters == "__" then
+            parentTable[index] = nil
+        end
+    end)
 
     local success : boolean, errorMessage : string = pcall(function()
         DataStore:SetAsync(userKey, userData)
@@ -161,7 +191,7 @@ local function playerJoined(player : Player)
         task.spawn(periodicalSave, player)
     end
 
-    EventSystem.fireEvent(EVENT_LIST.PlayerJoined, player, playerData, firstTime)
+    eventsList[EVENT_LIST.PlayerJoined]:fire(player, playerData, firstTime)
 end
 
 --[[
@@ -171,7 +201,7 @@ local function playerLeft(player : Player)
     storePaths[player] = nil
     saveData(player.UserId)
     local userKey : string = generateUserKey(player.UserId)
-    EventSystem.fireEvent(EVENT_LIST.PlayerLeft, player, playerSocket[userKey])
+    eventsList[EVENT_LIST.PlayerLeft]:fire(player, playerSocket[userKey])
     playerSocket[userKey] = nil
 end
 
@@ -179,10 +209,12 @@ end
     Handle when a server closes
 ]]
 local function serverClosed()
-    for userKey, userData in pairs(playerSocket) do
-        pcall(function()
-            DataStore:SetAsync(userKey, userData)
-        end)
+    if RunService:IsStudio() and not Settings.SaveInStudio then
+        return
+    end
+
+    for player : Player in pairs(storePaths) do
+        saveData(player.UserId)
     end
 end
 
@@ -211,9 +243,9 @@ local function recursiveFind(mainTable : table, arguments : {string}, index) : (
     end
 end
 
---[[
+--[=[
     Exposed methods
-]]
+]=]
 local function recursiveFindWrapper(player : Player, argument : string)
     local userKey = generateUserKey(player.UserId)
     local arguments : {string} = string.split(argument, KEY_SEPERATOR)
@@ -232,10 +264,10 @@ local function recursiveFindWrapper(player : Player, argument : string)
     return table.unpack(response)
 end
 
---[[
+--[=[
     Gets a specific element of the players data
-]]
-local function _get(player : Player, argument : string)
+]=]
+local function _get(player : Player, argument : string) : any
     if not userExists(player) then
         return
     end
@@ -249,10 +281,11 @@ local function _get(player : Player, argument : string)
     return value
 end
 
---[[
-    Sets a specific element of the players data
-]]
-local function _set(player : Player, argument : string, newValue : any)
+--[=[
+    Sets a specific element of the players data.
+    Also returns the old value (before the change was made)
+]=]
+local function _set(player : Player, argument : string, newValue : any) : any
     if not userExists(player) then
         return
     end
@@ -267,16 +300,18 @@ local function _set(player : Player, argument : string, newValue : any)
 
     if newValue ~= value then
         parentTable[valueIndex] = newValue
-        EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[generateUserKey(player.UserId)])        
+        eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[generateUserKey(player.UserId)])        
     end
 
     return value
 end
 
---[[
-    Checks if the given path value exists, usually used for dynamic data
-]]
-local function _exists(player : Player, argument : string)
+--[=[
+    Checks if the given path value exists.
+
+    Should only be used on dynamic tables
+]=]
+local function _exists(player : Player, argument : string) : boolean
     if not userExists(player) then
         return
     end
@@ -286,10 +321,11 @@ local function _exists(player : Player, argument : string)
     return (response[2] and response[3][response[4]] ~= nil)
 end
 
---[[
-    Increments a value of the players schema
-]]
-local function _increment(player : Player, argument : string, amount : number)
+--[=[
+    Increments a value of the players schema with a given path.
+    Only works in numerical values
+]=]
+local function _increment(player : Player, argument : string, amount : number) : nil
     local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argument)
 
     if not success then
@@ -301,24 +337,28 @@ local function _increment(player : Player, argument : string, amount : number)
     end
 
     parentTable[valueIndex] = value + amount
-    EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[generateUserKey(player.UserId)])
+    eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[generateUserKey(player.UserId)])
 end
 
-local function _wipeData(player : Player)
+--[=[
+    Resets the player's data. Will turn the player data
+    into the given data on a default Schema
+]=]
+local function _wipeData(player : Player) : nil
     if not userExists(player) then
         return
     end
 
     local userKey : string = generateUserKey(player.UserId)
     playerSocket[userKey] = DeepCopy(Schema)
-    EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[userKey])
+    eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[userKey])
     saveData(player.UserId)
 end
 
---[[
-    Gets the whole data table of the player
-]]
-local function _getTable(player : Player)
+--[=[
+    Returns the whole table holding the data of the given player
+]=]
+local function _getTable(player : Player) : table
     if not userExists(player) then
         return
     end
@@ -326,15 +366,16 @@ local function _getTable(player : Player)
     return playerSocket[generateUserKey(player.UserId)]
 end
 
---[[
-    Adds element to an array
-]]
-local function _addElement(player : Player, argument : string, element : any)
+--[=[
+    This method adds a new element into an array within the players
+    data. This can be of native lua type of custom object created
+]=]
+local function _addElement(player : Player, argument : string, element : any) : nil
     if not userExists(player) then
         return
     end
 
-    local value : any, success : boolean, parentTable : table = recursiveFindWrapper(player, argument)
+    local value : any, success : boolean = recursiveFindWrapper(player, argument)
     
     if not success then
         return warnWrapper("The given path is not valid: "..argument)
@@ -360,10 +401,12 @@ local function _addElement(player : Player, argument : string, element : any)
     table.insert(value, element)
 end
 
---[[
-    Forces a player data to be saved
-]]
-local function _forcedSave(player : Player)
+--[=[
+    Forces a player data to be saved. This method also
+    gets automatically called every x amount of time if the
+    auto-save is enablede and when the player leaves the experience
+]=]
+local function _forcedSave(player : Player) : nil
     saveData(player.UserId)
 end
 
@@ -374,9 +417,7 @@ loadEvents()
 Players.PlayerAdded:Connect(playerJoined)
 Players.PlayerRemoving:Connect(playerLeft)
 
-if not RunService:IsStudio() then
-    game:BindToClose(serverClosed)
-end
+game:BindToClose(serverClosed)
 
 local exposedMethods : table = {
     Exists = _exists,
@@ -407,6 +448,9 @@ function PlayerObject.new(player : Player)
     return playerObject
 end
 
+--[=[
+    Returns a new PlayerObject referencing the given player
+]=]
 exposedMethods.GetPlayer = function(player : Player)
     if not userExists(player) then
         return
@@ -415,8 +459,10 @@ exposedMethods.GetPlayer = function(player : Player)
     return PlayerObject.new(player)
 end
 
-for eventName : string, eventConstructor : table in pairs(EventSystem.eventConstructors) do
-    exposedMethods[eventName] = eventConstructor
+for eventName : string, eventBody : Event.Event in pairs(eventsList) do
+    exposedMethods[eventName] = eventBody
 end
+
+export type PlayerObject = typeof(exposedMethods)
 
 return exposedMethods

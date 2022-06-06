@@ -1,4 +1,9 @@
 # ProStore3
+
+Check the official page of this API instead of reading the below!
+
+## [ProStoreAPI](https://prooheckcp.github.io/ProStore3/)
+
 ## A small Roblox DataStore manager
 ProStore3 is a simple library used to easily manage  and dynamically update a Roblox's game database. It uses a session lock approach on which it stores and manipulates the users data from the moment they join the session to the moment that they leave.
 
