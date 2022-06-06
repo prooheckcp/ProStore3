@@ -243,9 +243,9 @@ local function recursiveFind(mainTable : table, arguments : {string}, index) : (
     end
 end
 
---[[
+--[=[
     Exposed methods
-]]
+]=]
 local function recursiveFindWrapper(player : Player, argument : string)
     local userKey = generateUserKey(player.UserId)
     local arguments : {string} = string.split(argument, KEY_SEPERATOR)
@@ -264,10 +264,10 @@ local function recursiveFindWrapper(player : Player, argument : string)
     return table.unpack(response)
 end
 
---[[
+--[=[
     Gets a specific element of the players data
-]]
-local function _get(player : Player, argument : string)
+]=]
+local function _get(player : Player, argument : string) : any
     if not userExists(player) then
         return
     end
@@ -281,10 +281,11 @@ local function _get(player : Player, argument : string)
     return value
 end
 
---[[
-    Sets a specific element of the players data
-]]
-local function _set(player : Player, argument : string, newValue : any)
+--[=[
+    Sets a specific element of the players data.
+    Also returns the old value (before the change was made)
+]=]
+local function _set(player : Player, argument : string, newValue : any) : any
     if not userExists(player) then
         return
     end
@@ -305,10 +306,12 @@ local function _set(player : Player, argument : string, newValue : any)
     return value
 end
 
---[[
-    Checks if the given path value exists, usually used for dynamic data
-]]
-local function _exists(player : Player, argument : string)
+--[=[
+    Checks if the given path value exists.
+
+    Should only be used on dynamic tables
+]=]
+local function _exists(player : Player, argument : string) : boolean
     if not userExists(player) then
         return
     end
@@ -318,10 +321,11 @@ local function _exists(player : Player, argument : string)
     return (response[2] and response[3][response[4]] ~= nil)
 end
 
---[[
-    Increments a value of the players schema
-]]
-local function _increment(player : Player, argument : string, amount : number)
+--[=[
+    Increments a value of the players schema with a given path.
+    Only works in numerical values
+]=]
+local function _increment(player : Player, argument : string, amount : number) : nil
     local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argument)
 
     if not success then
@@ -336,7 +340,11 @@ local function _increment(player : Player, argument : string, amount : number)
     eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[generateUserKey(player.UserId)])
 end
 
-local function _wipeData(player : Player)
+--[=[
+    Resets the player's data. Will turn the player data
+    into the given data on a default Schema
+]=]
+local function _wipeData(player : Player) : nil
     if not userExists(player) then
         return
     end
@@ -347,10 +355,10 @@ local function _wipeData(player : Player)
     saveData(player.UserId)
 end
 
---[[
-    Gets the whole data table of the player
-]]
-local function _getTable(player : Player)
+--[=[
+    Returns the whole table holding the data of the given player
+]=]
+local function _getTable(player : Player) : table
     if not userExists(player) then
         return
     end
@@ -358,15 +366,16 @@ local function _getTable(player : Player)
     return playerSocket[generateUserKey(player.UserId)]
 end
 
---[[
-    Adds element to an array
-]]
-local function _addElement(player : Player, argument : string, element : any)
+--[=[
+    This method adds a new element into an array within the players
+    data. This can be of native lua type of custom object created
+]=]
+local function _addElement(player : Player, argument : string, element : any) : nil
     if not userExists(player) then
         return
     end
 
-    local value : any, success : boolean, parentTable : table = recursiveFindWrapper(player, argument)
+    local value : any, success : boolean = recursiveFindWrapper(player, argument)
     
     if not success then
         return warnWrapper("The given path is not valid: "..argument)
@@ -392,10 +401,12 @@ local function _addElement(player : Player, argument : string, element : any)
     table.insert(value, element)
 end
 
---[[
-    Forces a player data to be saved
-]]
-local function _forcedSave(player : Player)
+--[=[
+    Forces a player data to be saved. This method also
+    gets automatically called every x amount of time if the
+    auto-save is enablede and when the player leaves the experience
+]=]
+local function _forcedSave(player : Player) : nil
     saveData(player.UserId)
 end
 
