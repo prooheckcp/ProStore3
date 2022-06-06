@@ -80,6 +80,10 @@ end
 
 --Returns if the player exists in the socket or not
 local function userExists(player : Player) : boolean
+    if not player then
+       return false, warnWrapper("The given player nil!")
+    end
+
     local userKey : string = generateUserKey(player.UserId)
     local userExists : boolean = not (playerSocket[userKey] == nil)
     if not userExists then
