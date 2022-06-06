@@ -17,7 +17,7 @@ local RunService = game:GetService("RunService")
 local DeepCopy = require(script.DeepCopy)
 local Schema = require(script.Schema)
 local Settings = require(script.Settings)
-local EventSystem = require(script.EventSystem)
+local Event = require(script.classes.Event)
 
 --Constant
 local META_PROPERTIES : Dictionary<string | string> = {
@@ -34,12 +34,13 @@ local EVENT_LIST : Dictionary<string | string> = {
 --Variables
 local DataStore = DataStoreService:GetDataStore(Settings)
 
+local eventsList : Dictionary<string | Event.Event> = {}
 local playerSocket : Dictionary<string | table> = {}
 local storePaths : Dictionary<Player | Dictionary<string | table>> = {} --Stores tables memory addresses in relation to their paths
 
 local function loadEvents() : nil
     for _, eventIndex : string in pairs(EVENT_LIST) do
-        EventSystem.newEvent(eventIndex)
+        eventsList[eventIndex] = Event.new()
     end
 end
 
@@ -186,7 +187,7 @@ local function playerJoined(player : Player)
         task.spawn(periodicalSave, player)
     end
 
-    EventSystem.fireEvent(EVENT_LIST.PlayerJoined, player, playerData, firstTime)
+    eventsList[EVENT_LIST.PlayerJoined]:fire(player, playerData, firstTime)
 end
 
 --[[
@@ -196,7 +197,7 @@ local function playerLeft(player : Player)
     storePaths[player] = nil
     saveData(player.UserId)
     local userKey : string = generateUserKey(player.UserId)
-    EventSystem.fireEvent(EVENT_LIST.PlayerLeft, player, playerSocket[userKey])
+    eventsList[EVENT_LIST.PlayerLeft]:fire(player, playerSocket[userKey])
     playerSocket[userKey] = nil
 end
 
@@ -294,7 +295,7 @@ local function _set(player : Player, argument : string, newValue : any)
 
     if newValue ~= value then
         parentTable[valueIndex] = newValue
-        EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[generateUserKey(player.UserId)])        
+        eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[generateUserKey(player.UserId)])        
     end
 
     return value
@@ -328,7 +329,7 @@ local function _increment(player : Player, argument : string, amount : number)
     end
 
     parentTable[valueIndex] = value + amount
-    EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[generateUserKey(player.UserId)])
+    eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[generateUserKey(player.UserId)])
 end
 
 local function _wipeData(player : Player)
@@ -338,7 +339,7 @@ local function _wipeData(player : Player)
 
     local userKey : string = generateUserKey(player.UserId)
     playerSocket[userKey] = DeepCopy(Schema)
-    EventSystem.fireEvent(EVENT_LIST.DataUpdated, player, playerSocket[userKey])
+    eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[userKey])
     saveData(player.UserId)
 end
 
@@ -432,6 +433,9 @@ function PlayerObject.new(player : Player)
     return playerObject
 end
 
+--[=[
+    Returns a new PlayerObject referencing the given player
+]=]
 exposedMethods.GetPlayer = function(player : Player)
     if not userExists(player) then
         return
@@ -440,10 +444,10 @@ exposedMethods.GetPlayer = function(player : Player)
     return PlayerObject.new(player)
 end
 
-for eventName : string, eventConstructor : table in pairs(EventSystem.eventConstructors) do
-    exposedMethods[eventName] = eventConstructor
+for eventName : string, eventBody : Event.Event in pairs(eventsList) do
+    exposedMethods[eventName] = eventBody
 end
 
-export type ProStore3 = typeof(exposedMethods)
+export type PlayerObject = typeof(exposedMethods)
 
 return exposedMethods
