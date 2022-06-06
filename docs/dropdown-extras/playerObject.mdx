@@ -17,12 +17,14 @@ The PlayerObject is specially useful when modifying multiple elements in the pla
 local ServerScriptService = game:GetService("ServerScriptService")
 local ProStore3 = require(ServerScriptService.ProStore3)
 
-local playerObject : ProStore3.PlayerObject = ProStore3.GetPlayer(player)
-local level : number = playerObject:Get("Level")
+ProStore3.PlayerJoined:Connect(function(player : Player)
+    local playerObject : ProStore3.PlayerObject = ProStore3.GetPlayer(player)
+    local level : number = playerObject:Get("Level")
 
-print("Level, ", level)
-playerObject:Set("Level", 3)
-print(playerObject:Get("Level"))
-playerObject:Increment("Level", 2)
-print(playerObject:Get("Level"))
+    print("Level, ", level) -- 1
+    playerObject:Set("Level", 3)
+    print(playerObject:Get("Level")) -- 3
+    playerObject:Increment("Level", 2)
+    print(playerObject:Get("Level")) -- 2
+end)
 ```
