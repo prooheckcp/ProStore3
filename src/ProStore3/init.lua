@@ -172,7 +172,7 @@ local function periodicalSave(player : Player)
             warnWrapper("Autosaving: ", player.Name, "'s data")
         end
         saveData(player.UserId)
-        periodicalSave(player.UserId)
+        periodicalSave(player)
     end
 end
 
@@ -213,7 +213,7 @@ local function serverClosed()
         return
     end
 
-    for player : Player in pairs(storePaths) do
+    for player : Player in pairs(Players:GetPlayers()) do
         saveData(player.UserId)
     end
 end
