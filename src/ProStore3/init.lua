@@ -213,7 +213,7 @@ local function serverClosed()
         return
     end
 
-    for player : Player in pairs(Players:GetPlayers()) do
+    for _, player : Player in pairs(Players:GetPlayers()) do
         saveData(player.UserId)
     end
 end
