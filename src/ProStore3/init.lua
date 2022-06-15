@@ -19,6 +19,17 @@ local Schema = require(script.Schema)
 local Settings = require(script.Settings)
 local Event = require(script.classes.Event)
 
+export type PlayerObject = {
+    Get : (self : PlayerObject, path : string) -> any,
+    Set : (self : PlayerObject, path : string, newValue  : any) -> any,
+    Exists : (self : PlayerObject, path : string) -> boolean,
+    Increment : (self : PlayerObject, path : string, amount : number) -> nil,
+    AddElement : (self : PlayerObject, path : string, element : table) -> nil,
+    GetTable : (self : PlayerObject)->table,
+    ForcedSave : (self : PlayerObject) -> nil,
+    WipeData : (self : PlayerObject) -> nil,
+}
+
 --Constant
 local META_PROPERTIES : Dictionary<string | string> = {
     Dynamic = "__Dynamic"
@@ -435,7 +446,7 @@ local PlayerObject = {}
 PlayerObject.__index = PlayerObject
 PlayerObject.player = nil
 
-function PlayerObject.new(player : Player)
+function PlayerObject.new(player : Player) : PlayerObject
     local playerObject = setmetatable({}, PlayerObject)
     playerObject.player = player
 
@@ -462,7 +473,5 @@ end
 for eventName : string, eventBody : Event.Event in pairs(eventsList) do
     exposedMethods[eventName] = eventBody
 end
-
-export type PlayerObject = typeof(exposedMethods)
 
 return exposedMethods

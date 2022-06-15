@@ -98,8 +98,8 @@ end
 
 local function testDynamicData()
     ProStore3.PlayerJoined:Connect(function(player : Player, playerData : table, firstTime : boolean)
-        local playerObject : _ProStore3T.PlayerObject = ProStore3.GetPlayer(player)
-        
+        local playerObject : ProStore3.PlayerObject = ProStore3.GetPlayer(player)
+  
         print(ProStore3.GetTable(player))
         changeDynamicArrays(player)
         print(ProStore3.GetTable(player))

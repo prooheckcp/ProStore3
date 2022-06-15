@@ -12,6 +12,5 @@ export type eventList = {
 }
 
 export type ProStore3 = typeof(ProStore3) | eventList
-export type PlayerObject = typeof(ProStore3)
 
 return nil
