@@ -297,7 +297,7 @@ function ProStore3.Set(player : Player, argument : string, newValue : any) : any
 
     if newValue ~= value then
         parentTable[valueIndex] = newValue
-        ProStore3.DataUpdated:Fire(player, argument, )        
+        ProStore3.DataUpdated:Fire(player, valueIndex, newValue, argument)        
     end
 
     return value
@@ -334,7 +334,7 @@ function ProStore3.Increment(player : Player, argument : string, amount : number
     end
 
     parentTable[valueIndex] = value + amount
-    ProStore3.DataUpdated:Fire(player, playerSocket[generateUserKey(player.UserId)])
+    ProStore3.DataUpdated:Fire(player, valueIndex, parentTable[valueIndex], argument)
 end
 
 --[=[
@@ -348,7 +348,7 @@ function ProStore3.WipeData(player : Player) : nil
 
     local userKey : string = generateUserKey(player.UserId)
     playerSocket[userKey] = DeepCopy(Schema)
-    ProStore3.DataUpdated:Fire(player, playerSocket[userKey])
+    ProStore3.DataUpdated:Fire(player)
     saveData(player.UserId)
 end
 

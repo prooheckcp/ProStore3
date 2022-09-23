@@ -80,13 +80,9 @@ local function testEvents()
         print("")
     end)
 
-    --[[
-    ProStore3.DataUpdated:Connect(function(player : Player, playerData :table)
-        print(player.Name, "'s data has been updated.")
-        print("Player data: ", playerData)
-        print("")
+    ProStore3.DataUpdated:Connect(function(...)
+        print(...)
     end)        
-    ]]
 end
 
 local function changeDynamicArrays(player : Player)
@@ -104,6 +100,7 @@ local function testDynamicData()
 end
 
 local function Main()
+    testEvents()
     testDynamicData()
 end
 
