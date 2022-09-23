@@ -33,6 +33,7 @@ local USER_KEY_FORMAT : string = "userData_"
 local DataStore = DataStoreService:GetDataStore(Settings)
 local playerSocket : Dictionary<string | table> = {}
 local storePaths : Dictionary<Player | Dictionary<string | table>> = {} --Stores tables memory addresses in relation to their paths
+local playerFirstTime : Dictionary<Player | boolean> = {}
 
 local ProStore3 = {}
 ProStore3.PlayerJoined = Event.new()
@@ -186,6 +187,7 @@ local function playerJoined(player : Player)
         task.spawn(periodicalSave, player)
     end
 
+    playerFirstTime[player] = firstTime
     ProStore3.PlayerJoined:Fire(player, playerData, firstTime)
 end
 
@@ -405,12 +407,6 @@ function ProStore3.ForcedSave(player : Player) : nil
     saveData(player.UserId)
 end
 
---Events
-Players.PlayerAdded:Connect(playerJoined)
-Players.PlayerRemoving:Connect(playerLeft)
-
-game:BindToClose(serverClosed)
-
 --[=[
     Returns a new PlayerObject referencing the given player
 ]=]
@@ -433,5 +429,15 @@ function PlayerObject:ForcedSave(...) return ProStore3.ForcedSave(self.player, .
 function PlayerObject:WipeData(...) return ProStore3.WipeData(self.player, ...) end
 
 ProStore3.PlayerObject = PlayerObject
+
+--Events
+Players.PlayerAdded:Connect(playerJoined)
+Players.PlayerRemoving:Connect(playerLeft)
+game:BindToClose(serverClosed)
+ProStore3.PlayerJoined:AddMiddleWare(function()
+    for _, player : Player in pairs(Players:GetPlayers()) do
+        ProStore3.PlayerJoined:Fire(player, ProStore3.GetTable(player), playerFirstTime[player])
+    end
+end)
 
 return ProStore3

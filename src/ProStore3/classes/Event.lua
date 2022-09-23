@@ -2,22 +2,25 @@
     Event system written by @Prooheckcp
 ]]
 
-local Players = game:GetService("Players")
-
 export type Connection = {Disconnect : (self : Connection) -> nil}
 export type Callback = {(callback : any) -> any}
 
 local Event : Event = {}
-Event.attachedCallbacks = {}
+Event.__index = Event
+Event.attachedCallbacks = nil :: {Callback}
+Event.attachedMiddleware = nil :: {Callback}
 
 function Event.new() : Event
-    local self : Event = setmetatable({
-        attachedCallbacks = {}
-    }, {__index = Event})
-
+    local self = setmetatable({}, Event)
+    self.attachedCallbacks = {}
+    self.attachedMiddleware = {}
     self.new = nil
 
     return self
+end
+
+function Event:AddMiddleWare(callback : Callback)
+    table.insert(self.attachedMiddleware, callback)
 end
 
 function Event:Fire(...) : nil
@@ -29,6 +32,10 @@ end
 function Event:Connect(callback : Callback) : Connection
     if typeof(callback) ~= "function" then
         return error("Callbacks must be of type: function!", 3)
+    end
+
+    for _, middleWareCallback : Callback in pairs(self.attachedMiddleware) do
+        task.spawn(middleWareCallback)
     end
 
     local attachedCallbacks : {Callback} = self.attachedCallbacks
