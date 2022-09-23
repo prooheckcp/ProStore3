@@ -188,6 +188,7 @@ local function playerLeft(player : Player)
     local userKey : string = generateUserKey(player.UserId)
     ProStore3.PlayerLeft:Fire(player, playerSocket[userKey])
     playerSocket[userKey] = nil
+    playerFirstTime[player] = nil
 end
 
 local function serverClosed()
