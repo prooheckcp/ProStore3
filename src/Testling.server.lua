@@ -6,8 +6,7 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 
 --Dependencies
-local _ProStore3T = require(ServerScriptService.ProStore3.ProStore3T)
-local ProStore3 : _ProStore3T.ProStore3 = require(ServerScriptService.ProStore3)
+local ProStore3 = require(ServerScriptService.ProStore3)
 
 local function testChainedData(player : Player)
     local playerObject = ProStore3.GetPlayer(player)
@@ -98,8 +97,6 @@ end
 
 local function testDynamicData()
     ProStore3.PlayerJoined:Connect(function(player : Player, playerData : table, firstTime : boolean)
-        local playerObject : ProStore3.PlayerObject = ProStore3.GetPlayer(player)
-  
         print(ProStore3.GetTable(player))
         changeDynamicArrays(player)
         print(ProStore3.GetTable(player))

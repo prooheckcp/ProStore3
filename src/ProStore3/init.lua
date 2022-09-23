@@ -6,6 +6,8 @@
         Twitter: @prooheckcp
 
     Prooheckcp is a full-time Portuguese game developer that works mainly with Roblox Studio and Unity.
+
+    Updated: 09/23/2022
 ]]
 
 --Services
@@ -18,17 +20,7 @@ local DeepCopy = require(script.DeepCopy)
 local Schema = require(script.Schema)
 local Settings = require(script.Settings)
 local Event = require(script.classes.Event)
-
-export type PlayerObject = {
-    Get : (self : PlayerObject, path : string) -> any,
-    Set : (self : PlayerObject, path : string, newValue  : any) -> any,
-    Exists : (self : PlayerObject, path : string) -> boolean,
-    Increment : (self : PlayerObject, path : string, amount : number) -> nil,
-    AddElement : (self : PlayerObject, path : string, element : table) -> nil,
-    GetTable : (self : PlayerObject)->table,
-    ForcedSave : (self : PlayerObject) -> nil,
-    WipeData : (self : PlayerObject) -> nil,
-}
+local PlayerObject = require(script.PlayerObject)
 
 --Constant
 local META_PROPERTIES : Dictionary<string | string> = {
@@ -36,24 +28,16 @@ local META_PROPERTIES : Dictionary<string | string> = {
 }
 local KEY_SEPERATOR : string = "." 
 local USER_KEY_FORMAT : string = "userData_"
-local EVENT_LIST : Dictionary<string | string> = {
-    PlayerJoined = "PlayerJoined",
-    PlayerLeft = "PlayerLeft",
-    DataUpdated = "DataUpdated"
-}
 
 --Variables
 local DataStore = DataStoreService:GetDataStore(Settings)
-
-local eventsList : Dictionary<string | Event.Event> = {}
 local playerSocket : Dictionary<string | table> = {}
 local storePaths : Dictionary<Player | Dictionary<string | table>> = {} --Stores tables memory addresses in relation to their paths
 
-local function loadEvents() : nil
-    for _, eventIndex : string in pairs(EVENT_LIST) do
-        eventsList[eventIndex] = Event.new()
-    end
-end
+local ProStore3 = {}
+ProStore3.PlayerJoined = Event.new()
+ProStore3.PlayerLeft = Event.new()
+ProStore3.DataUpdated = Event.new()
 
 --Simple algorithm to browse thru all direcorties of a given function
 local function binarySearchTree(object : table, callback : (parentTableReference : table, index : string, value : any)->nil) : nil
@@ -76,11 +60,11 @@ end
 
 --Helper methods
 --Generates the key that is used to store in the dataStore
-local function generateUserKey(userID : number)
+local function generateUserKey(userID : number) : string
     return USER_KEY_FORMAT..tostring(userID)
 end
 
-local function warnWrapper(... : {string})
+local function warnWrapper(... : {string}) : nil
     if RunService:IsStudio() and not Settings.OutputWarnings.inStudio then
         return
     elseif not RunService:IsStudio() and RunService:IsServer() and not Settings.OutputWarnings.inReleased then
@@ -202,7 +186,7 @@ local function playerJoined(player : Player)
         task.spawn(periodicalSave, player)
     end
 
-    eventsList[EVENT_LIST.PlayerJoined]:fire(player, playerData, firstTime)
+    ProStore3.PlayerJoined:fire(player, playerData, firstTime)
 end
 
 --[[
@@ -212,7 +196,7 @@ local function playerLeft(player : Player)
     storePaths[player] = nil
     saveData(player.UserId)
     local userKey : string = generateUserKey(player.UserId)
-    eventsList[EVENT_LIST.PlayerLeft]:fire(player, playerSocket[userKey])
+    ProStore3.PlayerLeft:fire(player, playerSocket[userKey])
     playerSocket[userKey] = nil
 end
 
@@ -278,7 +262,7 @@ end
 --[=[
     Gets a specific element of the players data
 ]=]
-local function _get(player : Player, argument : string) : any
+function ProStore3.Get(player : Player, argument : string) : any
     if not userExists(player) then
         return
     end
@@ -296,7 +280,7 @@ end
     Sets a specific element of the players data.
     Also returns the old value (before the change was made)
 ]=]
-local function _set(player : Player, argument : string, newValue : any) : any
+function ProStore3.Set(player : Player, argument : string, newValue : any) : any
     if not userExists(player) then
         return
     end
@@ -311,7 +295,7 @@ local function _set(player : Player, argument : string, newValue : any) : any
 
     if newValue ~= value then
         parentTable[valueIndex] = newValue
-        eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[generateUserKey(player.UserId)])        
+        ProStore3.DataUpdated:fire(player, argument, )        
     end
 
     return value
@@ -322,7 +306,7 @@ end
 
     Should only be used on dynamic tables
 ]=]
-local function _exists(player : Player, argument : string) : boolean
+function ProStore3.Exists(player : Player, argument : string) : boolean
     if not userExists(player) then
         return
     end
@@ -336,7 +320,7 @@ end
     Increments a value of the players schema with a given path.
     Only works in numerical values
 ]=]
-local function _increment(player : Player, argument : string, amount : number) : nil
+function ProStore3.Increment(player : Player, argument : string, amount : number) : nil
     local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argument)
 
     if not success then
@@ -348,28 +332,28 @@ local function _increment(player : Player, argument : string, amount : number) :
     end
 
     parentTable[valueIndex] = value + amount
-    eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[generateUserKey(player.UserId)])
+    ProStore3.DataUpdated:fire(player, playerSocket[generateUserKey(player.UserId)])
 end
 
 --[=[
     Resets the player's data. Will turn the player data
     into the given data on a default Schema
 ]=]
-local function _wipeData(player : Player) : nil
+function ProStore3.WipeData(player : Player) : nil
     if not userExists(player) then
         return
     end
 
     local userKey : string = generateUserKey(player.UserId)
     playerSocket[userKey] = DeepCopy(Schema)
-    eventsList[EVENT_LIST.DataUpdated]:fire(player, playerSocket[userKey])
+    ProStore3.DataUpdated:fire(player, playerSocket[userKey])
     saveData(player.UserId)
 end
 
 --[=[
     Returns the whole table holding the data of the given player
 ]=]
-local function _getTable(player : Player) : table
+function ProStore3.GetTable(player : Player) : table
     if not userExists(player) then
         return
     end
@@ -381,7 +365,7 @@ end
     This method adds a new element into an array within the players
     data. This can be of native lua type of custom object created
 ]=]
-local function _addElement(player : Player, argument : string, element : any) : nil
+function ProStore3.AddElement(player : Player, argument : string, element : any) : nil
     if not userExists(player) then
         return
     end
@@ -417,12 +401,9 @@ end
     gets automatically called every x amount of time if the
     auto-save is enablede and when the player leaves the experience
 ]=]
-local function _forcedSave(player : Player) : nil
+function ProStore3.ForcedSave(player : Player) : nil
     saveData(player.UserId)
 end
-
---Load systems
-loadEvents()
 
 --Events
 Players.PlayerAdded:Connect(playerJoined)
@@ -430,48 +411,27 @@ Players.PlayerRemoving:Connect(playerLeft)
 
 game:BindToClose(serverClosed)
 
-local exposedMethods : table = {
-    Exists = _exists,
-    Get = _get,
-    Set = _set,
-    Increment = _increment,
-    AddElement = _addElement,
-    GetTable = _getTable,
-    ForcedSave = _forcedSave,
-    WipeData = _wipeData
-}
-
---Player object for chained events
-local PlayerObject = {}
-PlayerObject.__index = PlayerObject
-PlayerObject.player = nil
-
-function PlayerObject.new(player : Player) : PlayerObject
-    local playerObject = setmetatable({}, PlayerObject)
-    playerObject.player = player
-
-    for methodName : string, methodBody in pairs(exposedMethods) do
-        playerObject[methodName] = function(self, ...)
-            return methodBody(self.player, ...)
-        end
-    end
-
-    return playerObject
-end
-
 --[=[
     Returns a new PlayerObject referencing the given player
 ]=]
-exposedMethods.GetPlayer = function(player : Player)
+function ProStore3.GetPlayer(player : Player)
     if not userExists(player) then
         return
     end
 
-    return PlayerObject.new(player)
+    return PlayerObject.new(player)    
 end
 
-for eventName : string, eventBody : Event.Event in pairs(eventsList) do
-    exposedMethods[eventName] = eventBody
-end
+--Setting up PlayerObject
+function PlayerObject:Get(...) return ProStore3.Get(self.player, ...) end
+function PlayerObject:Set(...) return ProStore3.Set(self.player, ...) end
+function PlayerObject:Exists(...) return ProStore3.Exists(self.player, ...) end
+function PlayerObject:Increment(...) return ProStore3.Increment(self.player, ...) end
+function PlayerObject:AddElement(...) return ProStore3.AddElement(self.player, ...) end
+function PlayerObject:GetTable(...) return ProStore3.GetTable(self.player, ...) end
+function PlayerObject:ForcedSave(...) return ProStore3.ForcedSave(self.player, ...) end
+function PlayerObject:WipeData(...) return ProStore3.WipeData(self.player, ...) end
 
-return exposedMethods
+ProStore3.PlayerObject = PlayerObject
+
+return ProStore3
