@@ -64,24 +64,20 @@ local function testDataManipulators(player : Player)
 end
 
 local function testEvents()
-    ProStore3.PlayerJoined:Connect(function(player : Player, playerData : table, firstTime : boolean)
-        print(player.Name, " joined the game.")
-        print("Player data: ", playerData)
-        print("First Time: ", firstTime)
-        print("")
-        --changeDynamicArrays(player)
-        --testChainedData(player)
-        --testDataManipulators(player)
+    ProStore3.PlayerJoined:Connect(function(...)
+        print("Player joined: ", ...)
+        task.wait(2)
+        ProStore3.Increment(({...})[1], "Profile.Currency", 3)
+        task.wait(2)
+        ProStore3.GetPlayer(({...})[1]):Set("Profile.Currency", 5)
     end)
 
-    ProStore3.PlayerLeft:Connect(function(player : Player, playerData : table)
-        print(player.Name, " left the game.")
-        print("Player data: ", playerData)
-        print("")
+    ProStore3.PlayerLeft:Connect(function(...)
+        print("Player left: ", ...)
     end)
 
     ProStore3.DataUpdated:Connect(function(...)
-        print(...)
+        print("Data updated: ", ...)
     end)        
 end
 
@@ -101,7 +97,7 @@ end
 
 local function Main()
     testEvents()
-    testDynamicData()
+  
 end
 
 Main()
