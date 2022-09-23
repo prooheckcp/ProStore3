@@ -59,7 +59,6 @@ local function binarySearchTree(object : table, callback : (parentTableReference
     browseNode(object)
 end
 
---Helper methods
 --Generates the key that is used to store in the dataStore
 local function generateUserKey(userID : number) : string
     return USER_KEY_FORMAT..tostring(userID)
@@ -107,9 +106,6 @@ local function getUserData(userID : number) : (table , boolean)
     end 
 end
 
---[[
-    Saves the given user data
-]]
 local function saveData(userID : number)
     if RunService:IsStudio() and not Settings.SaveInStudio then
         return
@@ -138,10 +134,6 @@ local function saveData(userID : number)
     end
 end
 
---[[
-    Assure that the given data is respecting the schema
-    in usage
-]]
 local function cleanData(data : table)
     local function assertTable(mainTable : table, secondaryTable : table)
         for mainIndex : string, mainValue : any in pairs(mainTable) do
@@ -172,9 +164,6 @@ local function periodicalSave(player : Player)
     end
 end
 
---[[
-    Handle a player that just joined the experience
-]]
 local function playerJoined(player : Player)
     storePaths[player] = {}
 
@@ -191,9 +180,6 @@ local function playerJoined(player : Player)
     ProStore3.PlayerJoined:Fire(player, playerData, firstTime)
 end
 
---[[
-    Handle a player that just left the experience
-]]
 local function playerLeft(player : Player)
     storePaths[player] = nil
     saveData(player.UserId)
@@ -202,9 +188,6 @@ local function playerLeft(player : Player)
     playerSocket[userKey] = nil
 end
 
---[[
-    Handle when a server closes
-]]
 local function serverClosed()
     if RunService:IsStudio() and not Settings.SaveInStudio then
         return
@@ -240,9 +223,6 @@ local function recursiveFind(mainTable : table, arguments : {string}, index) : (
     end
 end
 
---[=[
-    Exposed methods
-]=]
 local function recursiveFindWrapper(player : Player, argument : string)
     local userKey = generateUserKey(player.UserId)
     local arguments : {string} = string.split(argument, KEY_SEPERATOR)
@@ -262,17 +242,32 @@ local function recursiveFindWrapper(player : Player, argument : string)
 end
 
 --[=[
-    Gets a specific element of the players data
+    @param Player, ArgumentPath
+
+    @return Whatever value the player currently has in the given path
+
+    ```lua
+    local ServerScriptService = game:GetService("ServerScriptService")
+    local ProStore3 = require(ServerScriptService.ProStore3)
+
+    ProStore3.PlayerJoined:Connect(function(player : Player)
+        local level : number = ProStore3.Get(player, "Level")
+        local currency : number = ProStore3.Get(player, "Profile.Currency")
+
+        print("Level: ", level, " Currency: ", currency)
+    end)
+    ```
 ]=]
-function ProStore3.Get(player : Player, argument : string) : any
+function ProStore3.Get(player : Player, argumentPath : string) : any
+    assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
     if not userExists(player) then
         return
     end
 
-    local value : any, success : boolean = recursiveFindWrapper(player, argument)
+    local value : any, success : boolean = recursiveFindWrapper(player, argumentPath)
 
     if not success then
-        return warnWrapper("The given path is not valid: "..argument)
+        return warnWrapper("The given path is not valid: "..argumentPath)
     end
 
     return value
@@ -282,22 +277,23 @@ end
     Sets a specific element of the players data.
     Also returns the old value (before the change was made)
 ]=]
-function ProStore3.Set(player : Player, argument : string, newValue : any) : any
+function ProStore3.Set(player : Player, argumentPath : string, newValue : any) : any
+    assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
     if not userExists(player) then
         return
     end
 
-    local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argument)
+    local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argumentPath)
 
     if not success then
-        return warnWrapper("The given path is not valid: "..argument)
+        return warnWrapper("The given path is not valid: "..argumentPath)
     elseif value ~= nil and typeof(value) ~= typeof(newValue) then
         return warnWrapper("Invalid type. Expected <"..typeof(value).."> got <"..typeof(newValue).."> instead")
     end
 
     if newValue ~= value then
         parentTable[valueIndex] = newValue
-        ProStore3.DataUpdated:Fire(player, valueIndex, newValue, argument)        
+        ProStore3.DataUpdated:Fire(player, valueIndex, newValue, argumentPath)        
     end
 
     return value
@@ -308,12 +304,13 @@ end
 
     Should only be used on dynamic tables
 ]=]
-function ProStore3.Exists(player : Player, argument : string) : boolean
+function ProStore3.Exists(player : Player, argumentPath : string) : boolean
+    assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
     if not userExists(player) then
         return
     end
 
-    local response = {recursiveFindWrapper(player, argument)}
+    local response = {recursiveFindWrapper(player, argumentPath)}
 
     return (response[2] and response[3][response[4]] ~= nil)
 end
@@ -322,19 +319,18 @@ end
     Increments a value of the players schema with a given path.
     Only works in numerical values
 ]=]
-function ProStore3.Increment(player : Player, argument : string, amount : number) : nil
-    local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argument)
+function ProStore3.Increment(player : Player, argumentPath : string, amount : number) : nil
+    assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
+    assert(typeof(amount) == 'number', 'The amount to be added must be of type number, received {'..typeof(amount)..'} instead')
+    
+    local value : any, success : boolean, parentTable : table, valueIndex : string = recursiveFindWrapper(player, argumentPath)
 
     if not success then
-        return warnWrapper("The given path is not valid: "..argument)
-    end
-
-    if typeof(value) ~= "number" then
-        return warnWrapper("Increment can only be used on numerical values!")
+        return warnWrapper("The given path is not valid: "..argumentPath)
     end
 
     parentTable[valueIndex] = value + amount
-    ProStore3.DataUpdated:Fire(player, valueIndex, parentTable[valueIndex], argument)
+    ProStore3.DataUpdated:Fire(player, valueIndex, parentTable[valueIndex], argumentPath)
 end
 
 --[=[
@@ -367,15 +363,17 @@ end
     This method adds a new element into an array within the players
     data. This can be of native lua type of custom object created
 ]=]
-function ProStore3.AddElement(player : Player, argument : string, element : any) : nil
+function ProStore3.AddElement(player : Player, argumentPath : string, element : any) : nil
+    assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
+    assert(element ~= nil, 'The element to be added to the array must be different from {nil}')
     if not userExists(player) then
         return
     end
 
-    local value : any, success : boolean = recursiveFindWrapper(player, argument)
+    local value : any, success : boolean = recursiveFindWrapper(player, argumentPath)
     
     if not success then
-        return warnWrapper("The given path is not valid: "..argument)
+        return warnWrapper("The given path is not valid: "..argumentPath)
     end
 
     local isTable : boolean = typeof(value) == "table"
