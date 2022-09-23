@@ -275,7 +275,20 @@ end
 
 --[=[
     Sets a specific element of the players data.
-    Also returns the old value (before the change was made)
+
+    @param Player, ArgumentPath, newValue
+
+    @return OldValue before the change was made
+
+    ```lua
+    local ServerScriptService = game:GetService("ServerScriptService")
+    local ProStore3 = require(ServerScriptService.ProStore3)
+
+    ProStore3.PlayerJoined:Connect(function(player : Player)
+        local oldValue = ProStore3.Set(player, "Level", 3)
+        print("Level after set: ", ProStore3.Get(player, "Level"))
+    end)
+    ```
 ]=]
 function ProStore3.Set(player : Player, argumentPath : string, newValue : any) : any
     assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
@@ -302,7 +315,22 @@ end
 --[=[
     Checks if the given path value exists.
 
-    Should only be used on dynamic tables
+    [WARN] Should only be used on dynamic tables
+
+    @param Player, ArgumentPath
+
+    @return Exists : boolean
+
+    ```lua
+    local ServerScriptService = game:GetService("ServerScriptService")
+    local ProStore3 = require(ServerScriptService.ProStore3)
+
+    ProStore3.PlayerJoined:Connect(function(player : Player)
+        print("Exist: ", ProStore3.Exists(player, "DynamicArray.test")) --false
+        ProStore3.Set(player, "DynamicArray.test", 2)
+        print("Exist: ", ProStore3.Exists(player, "DynamicArray.test")) --true
+    end)
+    ```
 ]=]
 function ProStore3.Exists(player : Player, argumentPath : string) : boolean
     assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
@@ -318,6 +346,21 @@ end
 --[=[
     Increments a value of the players schema with a given path.
     Only works in numerical values
+
+    @param Player, ArgumentPath, amount
+
+    @return Void
+
+    ```lua
+    local ServerScriptService = game:GetService("ServerScriptService")
+    local ProStore3 = require(ServerScriptService.ProStore3)
+
+    ProStore3.PlayerJoined:Connect(function(player : Player)
+        print(ProStore3.Get(player, "Level")) -- Output: 1
+        ProStore3.Increment(player, "Level", 2)
+        print(ProStore3.Get(player, "Level")) -- Output: 3
+    end)
+    ```
 ]=]
 function ProStore3.Increment(player : Player, argumentPath : string, amount : number) : nil
     assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
@@ -336,6 +379,20 @@ end
 --[=[
     Resets the player's data. Will turn the player data
     into the given data on a default Schema
+
+    @param Player
+
+    @return Void
+
+    ```lua
+    local ServerScriptService = game:GetService("ServerScriptService")
+    local ProStore3 = require(ServerScriptService.ProStore3)
+
+    ProStore3.PlayerJoined:Connect(function(player : Player)
+        ProStore3.WipeData(player)
+        print(ProStore3.GetTable(player)) -- will print the same as  in the schema.lua
+    end)
+    ```
 ]=]
 function ProStore3.WipeData(player : Player) : nil
     if not userExists(player) then
@@ -350,6 +407,20 @@ end
 
 --[=[
     Returns the whole table holding the data of the given player
+
+    @param Player
+
+    @return Table
+
+    ```lua
+    local ServerScriptService = game:GetService("ServerScriptService")
+    local ProStore3 = require(ServerScriptService.ProStore3)
+
+    ProStore3.PlayerJoined:Connect(function(player : Player)
+        local fullData : table = ProStore3.GetTable(player)
+        print(fullData)
+    end)
+    ```
 ]=]
 function ProStore3.GetTable(player : Player) : table
     if not userExists(player) then
@@ -362,6 +433,23 @@ end
 --[=[
     This method adds a new element into an array within the players
     data. This can be of native lua type of custom object created
+
+    @param Player, ArgumentPath, Element
+
+    @return Void
+
+    ```lua
+    local ServerScriptService = game:GetService("ServerScriptService")
+    local ProStore3 = require(ServerScriptService.ProStore3)
+
+    ProStore3.PlayerJoined:Connect(function(player : Player)
+        print(ProStore3.Get(player, "Inventory"))
+        ProStore3.AddElement(player, "Inventory", {id = "sword", damage = 2})
+        print(ProStore3.Get(player, "Inventory"))
+        ProStore3.AddElement(player, "Inventory", {id = "knife", damage = 3})
+        print(ProStore3.Get(player, "Inventory"))
+    end)
+    ```
 ]=]
 function ProStore3.AddElement(player : Player, argumentPath : string, element : any) : nil
     assert(typeof(argumentPath) == 'string', 'The path must be of type String, received {'..typeof(argumentPath)..'} instead')
@@ -399,7 +487,24 @@ end
 --[=[
     Forces a player data to be saved. This method also
     gets automatically called every x amount of time if the
-    auto-save is enablede and when the player leaves the experience
+    auto-save is enabled and when the player leaves the experience
+
+    @param Player
+
+    @return Void
+
+    ```lua
+    local ServerScriptService = game:GetService("ServerScriptService")
+    local ProStore3 = require(ServerScriptService.ProStore3)
+
+    ProStore3.PlayerJoined:Connect(function(player : Player)
+        --Do some data changes here
+        ProStore3.Set(player, "level", 100)
+        ---------------------------
+
+        ProStore3.ForcedSave(player)
+    end)
+    ```
 ]=]
 function ProStore3.ForcedSave(player : Player) : nil
     saveData(player.UserId)
@@ -407,6 +512,17 @@ end
 
 --[=[
     Returns a new PlayerObject referencing the given player
+
+    ```lua
+    local playerObject : ProStore3.PlayerObject = ProStore3.GetPlayer(player)
+    local level : number = playerObject:Get("Level")
+
+    print("Level, ", level) -- 1
+    playerObject:Set("Level", 3)
+    print(playerObject:Get("Level")) -- 3
+    playerObject:Increment("Level", 2)
+    print(playerObject:Get("Level")) -- 2
+    ```
 ]=]
 function ProStore3.GetPlayer(player : Player)
     if not userExists(player) then

@@ -64,12 +64,14 @@ local function testDataManipulators(player : Player)
 end
 
 local function testEvents()
+   
     ProStore3.PlayerJoined:Connect(function(...)
         print("Player joined: ", ...)
         task.wait(2)
         ProStore3.Increment(({...})[1], "Profile.Currency", 3)
         task.wait(2)
         ProStore3.GetPlayer(({...})[1]):Set("Profile.Currency", 5)
+
     end)
 
     ProStore3.PlayerLeft:Connect(function(...)
