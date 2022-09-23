@@ -12,7 +12,7 @@ function HomepageHeader() {
   return (
     <header className={clsx(styles.heroBanner)}>
       <div className="container">
-        <h1 className={styles.bigText}>{siteConfig.title}</h1>
+        <img src="https://cdn.discordapp.com/attachments/670023265455964198/1022928220263297024/ProStore3_Logo.png"></img>
         <p className={styles.smallText}>{siteConfig.tagline}</p>
         <div className={styles.buttons}>
           <Link

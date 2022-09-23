@@ -51,7 +51,7 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: "img/Thumbnail.png",
+      image: "https://cdn.discordapp.com/attachments/670023265455964198/1022928220263297024/ProStore3_Logo.png",
       colorMode: {
         defaultMode: 'dark',
         disableSwitch: false,
