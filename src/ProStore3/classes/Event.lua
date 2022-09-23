@@ -2,6 +2,8 @@
     Event system written by @Prooheckcp
 ]]
 
+local Players = game:GetService("Players")
+
 export type Connection = {Disconnect : (self : Connection) -> nil}
 export type Callback = {(callback : any) -> any}
 
@@ -18,7 +20,7 @@ function Event.new() : Event
     return self
 end
 
-function Event:fire(...) : nil
+function Event:Fire(...) : nil
     for _, callback : Callback in pairs(self.attachedCallbacks) do
         pcall(callback, ...)
     end
@@ -26,7 +28,7 @@ end
 
 function Event:Connect(callback : Callback) : Connection
     if typeof(callback) ~= "function" then
-        return error("Callbacks must be of type: function!")
+        return error("Callbacks must be of type: function!", 3)
     end
 
     local attachedCallbacks : {Callback} = self.attachedCallbacks

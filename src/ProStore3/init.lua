@@ -186,7 +186,7 @@ local function playerJoined(player : Player)
         task.spawn(periodicalSave, player)
     end
 
-    ProStore3.PlayerJoined:fire(player, playerData, firstTime)
+    ProStore3.PlayerJoined:Fire(player, playerData, firstTime)
 end
 
 --[[
@@ -196,7 +196,7 @@ local function playerLeft(player : Player)
     storePaths[player] = nil
     saveData(player.UserId)
     local userKey : string = generateUserKey(player.UserId)
-    ProStore3.PlayerLeft:fire(player, playerSocket[userKey])
+    ProStore3.PlayerLeft:Fire(player, playerSocket[userKey])
     playerSocket[userKey] = nil
 end
 
@@ -295,7 +295,7 @@ function ProStore3.Set(player : Player, argument : string, newValue : any) : any
 
     if newValue ~= value then
         parentTable[valueIndex] = newValue
-        ProStore3.DataUpdated:fire(player, argument, )        
+        ProStore3.DataUpdated:Fire(player, argument, )        
     end
 
     return value
@@ -332,7 +332,7 @@ function ProStore3.Increment(player : Player, argument : string, amount : number
     end
 
     parentTable[valueIndex] = value + amount
-    ProStore3.DataUpdated:fire(player, playerSocket[generateUserKey(player.UserId)])
+    ProStore3.DataUpdated:Fire(player, playerSocket[generateUserKey(player.UserId)])
 end
 
 --[=[
@@ -346,7 +346,7 @@ function ProStore3.WipeData(player : Player) : nil
 
     local userKey : string = generateUserKey(player.UserId)
     playerSocket[userKey] = DeepCopy(Schema)
-    ProStore3.DataUpdated:fire(player, playerSocket[userKey])
+    ProStore3.DataUpdated:Fire(player, playerSocket[userKey])
     saveData(player.UserId)
 end
 
