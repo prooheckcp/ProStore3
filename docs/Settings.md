@@ -16,3 +16,4 @@ The settings file is just a file that allows you to change some of the behaviors
 |AutoSave.TimeGap          |How often do you want the users data to be saved (In minutes).                                       |
 |AutoSave.Notifications    |If you want a notification to be be printed into the console whenever a users data gets saved.       |
 |DatabasePrivateKey        |The key that will be used to create your dataStore and access it.                                    |
+|ShouldEnforceDataCheck    |It will attempt to check if the data is changed on the following 5 seconds or not. This prevents corrupted data when moving between places or upon rejoining the game. It will cause the loading to take an extra 5 seconds|
