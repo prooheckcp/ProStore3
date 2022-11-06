@@ -25,7 +25,7 @@ local Event = require(script.classes.Event)
 local PlayerObject = require(script.PlayerObject)
 
 --Constant
-local META_PROPERTIES : Dictionary<string | string> = {
+local META_PROPERTIES : {[string]: string} = {
     Dynamic = "__Dynamic"
 }
 local KEY_SEPERATOR : string = "." 
@@ -33,9 +33,9 @@ local USER_KEY_FORMAT : string = "userData_"
 
 --Variables
 local DataStore = DataStoreService:GetDataStore(Settings)
-local playerSocket : Dictionary<string | table> = {}
-local storePaths : Dictionary<Player | Dictionary<string | table>> = {} --Stores tables memory addresses in relation to their paths
-local playerFirstTime : Dictionary<Player | boolean> = {}
+local playerSocket : {[string]: table} = {}
+local storePaths : {[Player]: {[string]: table}} = {} --Stores tables memory addresses in relation to their paths
+local playerFirstTime : {[Player]: boolean} = {}
 
 local ProStore3 = {}
 ProStore3.PlayerJoined = Event.new()
