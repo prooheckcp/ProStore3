@@ -23,6 +23,7 @@ local Schema = require(script.Schema)
 local Settings = require(script.Settings)
 local Event = require(script.classes.Event)
 local PlayerObject = require(script.PlayerObject)
+local CompareTables = require(script.CompareTables)
 
 --Constant
 local META_PROPERTIES : {[string]: string} = {
@@ -36,7 +37,7 @@ local DataStore = DataStoreService:GetDataStore(Settings)
 local playerSocket : {[string]: table} = {}
 local storePaths : {[Player]: {[string]: table}} = {} --Stores tables memory addresses in relation to their paths
 local playerFirstTime : {[Player]: boolean} = {}
-
+local firstReceivedData : {[Player]: table} = {}
 local ProStore3 = {}
 ProStore3.PlayerJoined = Event.new()
 ProStore3.PlayerLeft = Event.new()
@@ -171,6 +172,25 @@ local function playerJoined(player : Player)
 
     local playerData : table, firstTime : boolean = getUserData(player.UserId)
     local userKey : string = generateUserKey(player.UserId)
+
+    firstReceivedData[player] = playerData
+    local counter = 0
+    if Settings.ShouldEnforceDataCheck then
+        repeat
+            task.wait(1)
+            local playerData2 : table = getUserData(player.UserId)
+            if not CompareTables(firstReceivedData[player], playerData2) then
+
+                playerData = playerData2
+                playerSocket[userKey] = playerData
+            end
+            counter += 1
+        until        
+            counter >= 5
+    end
+
+    
+
     cleanData(playerData)
     playerSocket[userKey] = playerData
 

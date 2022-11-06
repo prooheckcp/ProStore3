@@ -1,6 +1,7 @@
 return {
     SaveInStudio = true,
     LoadInStudio = true,
+    ShouldEnforceDataCheck = true, --Makes sure the data is not corrupted. Will take longer to load players
     OutputWarnings = {
         inStudio = true,
         inReleased = false
